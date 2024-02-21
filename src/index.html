@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Sunstealer</title>
+  <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body onunload="if (interval) clearInterval(interval);">
+  <div class="main-toolbar">
+    <div style="align-items: center; display: flex; flex-direction: row;">
+      <div class="icon-menu main-toolbar-icon" onclick="window.index.Menu();"></div>
+      <div style="font-size: 18px; padding-left: 10px;" id="title">Sunstealer</div>
+    </div>
+    <div style="align-items: center; display: flex; flex-direction: row; padding-right: 20px;">
+      <div style="cursor: default; font-size: 18px; padding-right: 20px;" id="clock"></div>
+      <div class="icon-notifications-none main-toolbar-icon" id="icon_notifications" onclick="window.index.Notifications();"></div>
+      <div class="icon-user main-toolbar-icon" onclick="window.index.Identity();"></div>
+      <div class="icon-kiosk main-toolbar-icon" onclick="window.index.Kiosk();"></div>
+    </div>
+  </div>
+
+  <div style="border: 2px var(--color-background-modal) solid; box-sizing: border-box; display: flex; flex-direction: row; height: calc(100vh - 34px); padding: 20px; width: 100vw;" id="canvas">
+    <div style="background-image: url('./images/world.png'); background-size: cover; background-repeat: no-repeat;  align-items: center; display: flex; flex-direction: column; height: 100%; justify-content: center; overflow: hidden; width: 100%;" id="world">
+    </div>
+
+    <div style="align-items: center; display: none; flex-direction: column; height: 100%; justify-content: center; overflow: hidden; width: 100%;" id="status">
+      <div style="width: 50%; white-space: pre-line;">
+        <progress style="width: 100%" id="progress" value="0" max="100"></progress>
+        <div id="file"></div>
+        <div id="ip"></div>
+      </div>
+    </div>
+    
+    <div style="display: none; overflow: hidden;" id="left">
+      <table style="min-width: 400px; overflow: hidden;">
+        <thead><tr><th style="min-width: 100px;">Count</th><th style="min-width: 150px;">IP</th><th style="min-width: 250px;">Name</th></tr></thead>
+        <tbody style="height: calc(100vh - 110px); overflow-y: auto;" id="list"`></tbody>
+      </table>
+    </div>
+
+    <div style="display: none; flex-direction: column; overflow: hidden; width: calc(100% - 500px)" id="right">
+      <div style="height: 60%; overflow: auto; padding: 2px;" id="rdap"></div>
+      <div style="height: 40%; overflow: auto; padding: 2px;" id="packets"></div>
+    </div>
+  </div>
+
+  <dialog style="height: 200px; width: 320px;" id="dialog_about">
+    <div class="dialog-toolbar">
+      <div>About</div>
+      <div class="icon-close dialog-toolbar-icon" style="right: -5px;" onclick="_dialog_about.close();"></div>
+    </div>
+    <div style="align-items: center; display: flex; height: calc(100% - 50px); justify-content: center; width: 100%;">
+      <table style="margin-left: 15%; width: 85%;">
+        <tr><td style="width: 130px;">Sunstealer</td><td id="version"></td></tr>
+        <tr><td>Chrome</td><td id="version_chrome"></td></tr>
+        <tr><td>Electron</td><td id="version_electron"></td></tr>
+        <tr><td>Node.js</td><td id="version_node"></td></tr>
+        <tr><td></td><td style="height: 30px;">Adam Mauger</td></tr>
+      </table>
+    </div>
+  </dialog>
+ 
+
+  <dialog style="height: 50%; width: 50%;" id="dialog_win32">
+    <div class="dialog-toolbar">
+      <div>Win32 Help</div>
+      <div class="icon-close dialog-toolbar-icon" style="right: -5px;" onclick="_dialog_win32.close();"></div>
+    </div>
+    <div style="align-items: flex-start; display: flex; flex-direction: column; height: calc(100% - 50px); justify-content: center; width: 100%;">
+      <div>This script captures 10 minute duration t-shark files with prefix: d:\share\tshark_%SUBFILENAME%.txt.</div>  
+      <div>Use Configuration: <b>{ "filename_prefix": "tshark_20" }</b> and batch process with: <b>Menu - Open Folder</b>.</div>
+<pre style="color: var(--green)">
+
+timeout /t 10
+
+:loop
+
+set CUR_YYYY=%date:~10,4%
+set CUR_MM=%date:~4,2%
+set CUR_DD=%date:~7,2%
+
+set CUR_HH=%time:~0,2%
+if %CUR_HH% lss 10 (set CUR_HH=0%time:~1,1%)
+ 
+set CUR_NN=%time:~3,2%
+set CUR_SS=%time:~6,2%
+set CUR_MS=%time:~9,2%
+
+set SUBFILENAME=%CUR_YYYY%%CUR_MM%%CUR_DD%-%CUR_HH%%CUR_NN%%CUR_SS%
+ 
+"C:\Program Files\Wireshark\tshark.exe" -i ajmnet -a duration:600 > d:\share\tshark_%SUBFILENAME%.txt
+
+goto loop
+</pre>
+    </div>
+  </dialog>
+
+  <dialog style="height: 50%; width: 50%;" id="dialog_configuration" onblur="this.open=false;">
+    <div class="dialog-toolbar" >
+      <div>Configuration</div>
+      <div class="icon-close dialog-toolbar-icon" style="right: -5px;" onclick="_dialog_configuration.close();"></div>
+    </div>
+    <textarea style="background-color: var(--color-background-modal); border: none; color: whitesmoke; height: calc(100% - 120px); outline: none; width: 100%;" id="configuration"></textarea>
+    <div style="align-items: top; display: flex; height: 70px; justify-content: space-between; padding-right: 10px;">
+      <div style="color: var(--green);" id="configuration_status">Status: valid</div>
+      <button onclick="try { 
+        JSON.parse(document.getElementById('configuration').value);
+        _configuration_status.style.color='var(--green)';
+        _configuration_status.innerText = `Status: valid`;
+        window.index.Configuration();
+      } catch(e) { _configuration_status.style.color='var(--red)'; _configuration_status.innerText = `Status: ${e.message}`; }">Update</button>
+    </div>
+  </dialog>
+
+  <dialog style="height: 300px; left: calc(100% - 400px); position: absolute; bottom: calc(100% - 475px); width: 300px" id="dialog_identity" onblur="this.open = false;">
+    <div class="dialog-toolbar">
+      <div>Sunstealer Identity</div>
+      <div class="icon-close dialog-toolbar-icon" style="right: -5px;" onclick="_dialog_identity.close();"></div>
+    </div>
+    <div style="align-items: center; display: flex; flex-direction: column; height: calc(100% - 70px); justify-content: center; overflow-y: auto; width: 100%;">
+      <div style="align-items: center; display: flex; flex-direction: row; height: 32px; padding-left: 10px; width: calc(100% - 15px);">
+        <div style="color: gray; width: 50%;">Key 1</div><div style="width: 50%;">Value 1</div>
+      </div>
+      <div style="align-items: center; display: flex; flex-direction: row; height: 32px; padding-left: 10px; width: calc(100% - 15px);">
+        <div style="color: gray; width: 50%;">Key 2</div><div style="width: 50%;">Value 2</div>
+      </div>
+      <div style="align-items: center; display: flex; flex-direction: row; height: 32px; padding-left: 10px; width: calc(100% - 15px);">
+        <div style="color: gray; width: 50%;">Key 3</div><div style="width: 50%;">Value 3</div>
+      </div>
+      <hr style="border: none; background-color: gray; height: 1px; width: 100%;" />
+      <div class="menu-option" style="align-items: center; display: inline-flex; height: 32px; padding-left: 10px; width: calc(100% - 15px);" onclick="_dialog_identity.close();">Option 1</div>
+      <div class="menu-option" style="align-items: center; display: inline-flex; height: 32px; padding-left: 10px; width: calc(100% - 15px);" onclick="_dialog_identity.close();">Option 2</div>
+      <div class="menu-option" style="align-items: center; display: inline-flex; height: 32px; padding-left: 10px; width: calc(100% - 15px);" onclick="_dialog_identity.close();">Option 3</div>
+    </div>
+  </dialog>
+
+  <dialog style="height: 60%; width: 60%;" id="dialog_log" onblur="this.open=false;">
+    <div class="dialog-toolbar">
+      <div>Log</div>
+      <div class="icon-close dialog-toolbar-icon" style="right: -5px;" onclick="_dialog_log.close();"></div>
+    </div>
+    <table style="display: block; height: calc(100% - 80px); user-select: text; width: 100%;">
+      <thead style="align-items: center; display: flex; font-size: 14px; height: 32px;">
+        <th><td style="min-width: 170px;">Time</td><td style="min-width: 70px;">Severity</td><td style="width: 1000px;">Message</td></th>
+      </thead>
+      <tbody style="display: block; height: calc(100% - 32px); overflow-y: auto;" id="log"></tbody>
+    </table>
+  </dialog>
+  
+  <dialog style="height: calc(100% - 110px); left: calc(100% - 700px); top: 70px; width: 600px" id="dialog_notifications" onblur="this.open = false;">
+    <div class="dialog-toolbar">
+      <button style="height: 32px; left: 10px; position: absolute; width: 150px;" onclick="window.index.DeleteNotifications();"><div class="icon-delete">Delete All</div></button>
+      <div>Notifications</div>
+      <div class="icon-close dialog-toolbar-icon" style="right: -5px;" onclick="_dialog_notifications.close();"></div>
+    </div>
+    <div style="height: calc(100% - 80px); overflow-y: auto; width: 100%;" id="notifications"></div>
+  </dialog>
+</body>
+
+<script>
+  _clock = document.getElementById("clock");
+  _configuration_status = document.getElementById('configuration_status');
+  _dialog_about = document.getElementById("dialog_about");
+  _dialog_configuration = document.getElementById("dialog_configuration");
+  _dialog_identity = document.getElementById("dialog_identity");
+  _dialog_log = document.getElementById("dialog_log");
+  _dialog_notifications = document.getElementById("dialog_notifications");
+  _dialog_string = document.getElementById("dialog_string");
+  _dialog_win32 = document.getElementById("dialog_win32");
+  _log = document.getElementById("log");
+  _notifications = document.getElementById("notifications");
+
+  _clock.innerHTML = new Date().toLocaleTimeString();
+  const interval = setInterval( () => { _clock.innerHTML = new Date().toLocaleTimeString(); }, 1000);
+</script>
+
+</html>

@@ -1,0 +1,18 @@
+{
+    "debug": true,
+    "log": {
+        "file_size": 10000,
+        "files": 10,
+        "level": 0,
+        "memory_size": 500
+    },
+    "filename_prefix": "tshark_20",
+    "home_interface": "10.0.0",
+    "_home_interface": "192.168.0",
+    "uri_ip": "https://rdap.arin.net/registry/ip/",
+    "AFRINIC_uri_ip": "https://rdap.afrinic.net/rdap/ip/",
+    "APNIC_uri_ip": "https://rdap.apnic.net/ip/",
+    "ARIN_uri_ip": "https://rdap.arin.net/registry/ip/",
+    "LACNIC_uri_ip": "https://rdap.lacnic.net/rdap/ip/",
+    "RIPE_uri_ip": "https://rdap.arin.net/registry/ip/"
+}
