@@ -12,9 +12,9 @@ Then, **Menu** - **Open** and browse a text file, for example:
 
 $ cat my-text-file.txt
 
-Line 1  142.250.72.68
-Line 2  20.103.85.33
-line 3  95.173.136.163
+- Line 1  142.250.72.68
+- Line 2  20.103.85.33
+- line 3  95.173.136.163
 
 or 
 
